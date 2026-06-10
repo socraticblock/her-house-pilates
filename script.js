@@ -1,9 +1,9 @@
 const schedule = [
-  { id: "flow-1", title: "Reformer Flow", level: "All Levels", dayOffset: 2, time: "09:00", duration: 60, capacity: 8, booked: 5, instructor: "Anna", status: "open" },
-  { id: "beginner-1", title: "Beginner Reformer", level: "Beginner Friendly", dayOffset: 2, time: "11:00", duration: 60, capacity: 8, booked: 4, instructor: "Mariam", status: "open" },
-  { id: "sculpt-1", title: "Sculpt & Strength", level: "Intermediate", dayOffset: 2, time: "18:30", duration: 60, capacity: 8, booked: 6, instructor: "Nino", status: "open" },
-  { id: "reset-1", title: "Stretch & Reset", level: "All Levels", dayOffset: 1, time: "09:00", duration: 50, capacity: 8, booked: 3, instructor: "Anna", status: "open" },
-  { id: "flow-2", title: "Morning Reformer", level: "All Levels", dayOffset: 5, time: "10:00", duration: 50, capacity: 8, booked: 8, instructor: "Mariam", status: "open" },
+  { id: "flow-1", title: "Reformer Flow", level: "All Levels", dayOffset: 2, time: "09:00", duration: 60, capacity: 8, booked: 5, instructor: "Nata", status: "open" },
+  { id: "beginner-1", title: "Beginner Reformer", level: "Beginner Friendly", dayOffset: 2, time: "11:00", duration: 60, capacity: 8, booked: 4, instructor: "Elle", status: "open" },
+  { id: "sculpt-1", title: "Sculpt & Strength", level: "Intermediate", dayOffset: 2, time: "18:30", duration: 60, capacity: 8, booked: 6, instructor: "Nata", status: "open" },
+  { id: "reset-1", title: "Stretch & Reset", level: "All Levels", dayOffset: 1, time: "09:00", duration: 50, capacity: 8, booked: 3, instructor: "Elle", status: "open" },
+  { id: "flow-2", title: "Morning Reformer", level: "All Levels", dayOffset: 5, time: "10:00", duration: 50, capacity: 8, booked: 8, instructor: "Nata", status: "open" },
 ];
 
 const bookings = new Map();
