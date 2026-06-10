@@ -2,7 +2,7 @@ const schedule = [
   { id: "flow-1", title: "Reformer Flow", level: "All Levels", dayOffset: 2, time: "09:00", duration: 60, capacity: 8, booked: 5, instructor: "Anna", status: "open" },
   { id: "beginner-1", title: "Beginner Reformer", level: "Beginner Friendly", dayOffset: 2, time: "11:00", duration: 60, capacity: 8, booked: 4, instructor: "Mariam", status: "open" },
   { id: "sculpt-1", title: "Sculpt & Strength", level: "Intermediate", dayOffset: 2, time: "18:30", duration: 60, capacity: 8, booked: 6, instructor: "Nino", status: "open" },
-  { id: "reset-1", title: "Stretch & Reset", level: "All Levels", dayOffset: 1, time: "19:00", duration: 50, capacity: 8, booked: 3, instructor: "Anna", status: "open" },
+  { id: "reset-1", title: "Stretch & Reset", level: "All Levels", dayOffset: 1, time: "09:00", duration: 50, capacity: 8, booked: 3, instructor: "Anna", status: "open" },
   { id: "flow-2", title: "Morning Reformer", level: "All Levels", dayOffset: 5, time: "10:00", duration: 50, capacity: 8, booked: 8, instructor: "Mariam", status: "open" },
 ];
 
@@ -45,14 +45,16 @@ function bookingState(item) {
   const daysUntil = (date - now) / 864e5;
   const spaces = item.capacity - item.booked;
 
-  if (item.status === "cancelled") return { label: "Cancelled", disabled: true, reason: "This class has been cancelled." };
-  if (spaces <= 0) return { label: "Class full", disabled: true, reason: "This class is full." };
-  if (hoursUntil <= 24) return { label: "Booking closed", disabled: true, reason: "Booking closes 24 hours before class." };
-  if (daysUntil > 7) return { label: "Not yet open", disabled: true, reason: "Bookings open 7 days before class." };
-  return { label: `${spaces} spaces left`, disabled: false, reason: "" };
+  if (item.status === "cancelled") return { label: "Cancelled", buttonLabel: "Cancelled", disabled: true, reason: "This class has been cancelled." };
+  if (spaces <= 0) return { label: "Class full", buttonLabel: "Class Full", disabled: true, reason: "This class is full." };
+  if (hoursUntil <= 24) return { label: "Booking closed - less than 24h before class", buttonLabel: "Booking Closed", disabled: true, reason: "Booking closes 24 hours before class." };
+  if (daysUntil > 7) return { label: "Bookings open 7 days before class", buttonLabel: "Not Yet Open", disabled: true, reason: "Bookings open 7 days before class." };
+  return { label: `${spaces} spaces left`, buttonLabel: "Book Class", disabled: false, reason: "" };
 }
 
 function renderSchedule() {
+  if (!classList) return;
+
   classList.innerHTML = schedule.map((item) => {
     const date = classDate(item);
     const state = bookingState(item);
@@ -70,7 +72,7 @@ function renderSchedule() {
         </div>
         <p class="spaces">${state.label}</p>
         <button class="button button-solid" type="button" data-class-id="${item.id}" ${state.disabled ? "disabled" : ""}>
-          ${state.disabled ? "Unavailable" : "Book Class"}
+          ${state.buttonLabel}
         </button>
       </article>
     `;
@@ -78,6 +80,11 @@ function renderSchedule() {
 }
 
 function openModal(item) {
+  if (!modal || !form || !selectedClassText || !classIdInput) {
+    window.location.href = "/schedule/";
+    return;
+  }
+
   const date = classDate(item);
   selectedClassText.textContent = `${item.title} - ${formatDate(date)}, ${formatTimeRange(date, item.duration)} with ${item.instructor}.`;
   classIdInput.value = item.id;
@@ -88,6 +95,8 @@ function openModal(item) {
 }
 
 function closeModal() {
+  if (!modal || !form) return;
+
   modal.classList.remove("is-open");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
@@ -95,6 +104,8 @@ function closeModal() {
 }
 
 function showToast(message) {
+  if (!toast) return;
+
   toast.textContent = message;
   toast.classList.add("is-visible");
   setTimeout(() => toast.classList.remove("is-visible"), 5200);
@@ -123,12 +134,12 @@ document.addEventListener("click", (event) => {
   }
 
   if (event.target.closest(".mobile-nav a")) {
-    mobileNav.classList.remove("is-open");
-    navToggle.setAttribute("aria-expanded", "false");
+    mobileNav?.classList.remove("is-open");
+    navToggle?.setAttribute("aria-expanded", "false");
   }
 });
 
-navToggle.addEventListener("click", () => {
+navToggle?.addEventListener("click", () => {
   const isOpen = mobileNav.classList.toggle("is-open");
   navToggle.setAttribute("aria-expanded", String(isOpen));
 });
@@ -139,7 +150,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-form.addEventListener("submit", (event) => {
+form?.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(form);
   const classId = data.get("classId");
@@ -175,5 +186,5 @@ form.addEventListener("submit", (event) => {
   closeModal();
   renderSchedule();
   const date = classDate(item);
-  showToast(`You're booked <3 We'll see you for ${item.title} on ${formatDate(date)} at ${item.time}. Please arrive 10 minutes early.`);
+  showToast(`You're booked. We'll see you for ${item.title} on ${formatDate(date)} at ${item.time}. Please arrive 10 minutes early.`);
 });
