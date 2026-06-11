@@ -251,7 +251,7 @@ function findSoonestBookableSlideIndex(slides) {
 // - soon: < 24h away or more than 7 days away
 // - bookable: 24h+ and <= 7 days away
 
-const SOON_REASON_24H = "Booking opens 24 hours before class.";
+const SOON_REASON_24H = "Booking closes 24 hours before class.";
 const SOON_REASON_7D  = "Bookings open 7 days before class.";
 const PAST_REASON     = "This class has already started or passed.";
 const COMING_REASON   = "This class is not bookable yet.";
@@ -289,7 +289,7 @@ function getBookingState(slot, dayDate) {
   if (hoursUntil < 24) {
     return {
       state: "soon",
-      label: "Bookings open 24h before class",
+      label: "Booking closed - less than 24h before class",
       buttonLabel: "Closed",
       reason: SOON_REASON_24H,
       disabled: true,
