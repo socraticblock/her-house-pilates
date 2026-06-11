@@ -248,8 +248,8 @@ function findSoonestBookableSlideIndex(slides) {
 // Per spec: 4 states — bookable, soon, past, comingSoon.
 // - comingSoon: data.bookable === false (overrides everything)
 // - past: class datetime is in the past (in Tbilisi)
-// - soon: < 24h away (or > 7d, defensive)
-// - bookable: 24h+ and <= 7d away
+// - soon: < 24h away or more than 7 days away
+// - bookable: 24h+ and <= 7 days away
 
 const SOON_REASON_24H = "Booking opens 24 hours before class.";
 const SOON_REASON_7D  = "Bookings open 7 days before class.";
@@ -274,7 +274,6 @@ function getBookingState(slot, dayDate) {
 
   const now = nowInTbilisi();
   const hoursUntil = (classStart - now) / 36e5;
-  const daysFromTodayMidnight = (classStart - todayMidnightInTbilisi()) / 864e5;
 
   // 3. Past
   if (classStart < now) {
@@ -296,8 +295,8 @@ function getBookingState(slot, dayDate) {
       disabled: true,
     };
   }
-  // 5. Defensive: > 7d (unreachable in this carousel, but keeps the 7d rule in code)
-  if (daysFromTodayMidnight > 7) {
+  // 5. More than 7 days away.
+  if (hoursUntil > 168) {
     return {
       state: "soon",
       label: "Bookings open 7 days before class",
@@ -339,6 +338,8 @@ if (typeof window !== "undefined") {
   window.getBookingState = getBookingState;
   window.formatScheduleDate = formatScheduleDate;
   window.nowInTbilisi = nowInTbilisi;
+  window.todayMidnightInTbilisi = todayMidnightInTbilisi;
+  window.getTbilisiParts = getTbilisiParts;
   window.getClassStartTime = getClassStartTime;
   window.dateForSection = dateForSection;
   window.findSoonestBookableSlideIndex = findSoonestBookableSlideIndex;

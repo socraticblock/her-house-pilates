@@ -114,10 +114,8 @@ function openWhatsAppForWeekly(slot, dayLabel, dayDate, name, whatsapp, notes) {
 
 // === Schedule carousel ===
 //
-// Renders 6 slides from window.weeklySchedule. Each row is date-aware:
-// its booking state is computed against the next upcoming occurrence in
-// Tbilisi local time, so 24h/7d/past/comingSoon rules hold regardless of
-// the visitor's browser timezone.
+// Renders the rolling booking window from the weekly template. The schedule
+// shows dated class days from today through the 7-day advance booking limit.
 
 function renderScheduleCarousel() {
   const root = document.querySelector("[data-carousel]");
@@ -127,23 +125,10 @@ function renderScheduleCarousel() {
   const data = window.weeklySchedule;
   if (!track || !dots || !data) return;
 
-  // Precompute per-section dates. The weekend slide has TWO sub-sections
-  // (Saturday + Sunday) each with its own day-of-week, so each gets its own date.
-  // Weekday slides have a single date.
-  const slideDates = data.map((day) => ({
-    day,
-    dates: day.sections.map((section) => window.dateForSection(day.id, section.heading)),
-  })).sort((a, b) => {
-    const aDate = a.dates.find(Boolean);
-    const bDate = b.dates.find(Boolean);
-    if (!aDate && !bDate) return 0;
-    if (!aDate) return 1;
-    if (!bDate) return -1;
-    return aDate - bDate;
-  });
+  const slideDates = buildRollingScheduleSlides(data);
 
   track.innerHTML = slideDates.map(({ day, dates }, i) => {
-    const isWeekend = day.id === "weekend";
+    const isWeekend = day.baseId === "saturday" || day.baseId === "sunday";
     // Slide-level date (used for the slide header) = first section's date.
     const headerDate = dates[0];
     const headerDateStr = window.formatScheduleDate(headerDate);
@@ -203,6 +188,36 @@ function renderScheduleCarousel() {
   initScheduleCarousel(root, slideDates);
 }
 
+function buildRollingScheduleSlides(data) {
+  const byId = new Map(data.map((day) => [day.id, day]));
+  const weekdayIds = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const today = window.todayMidnightInTbilisi();
+  const slides = [];
+
+  for (let offset = 0; offset <= 7; offset++) {
+    const date = new Date(today);
+    date.setUTCDate(date.getUTCDate() + offset);
+    const parts = window.getTbilisiParts(date);
+    const baseId = weekdayIds[new Date(date.getTime() + 4 * 60 * 60 * 1000).getUTCDay()];
+    const template = baseId === "saturday" || baseId === "sunday" ? byId.get("weekend") : byId.get(baseId);
+    if (!template) continue;
+
+    const section = template.sections.find((entry) => entry.heading.toLowerCase() === baseId) || template.sections[0];
+    const dateKey = `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+    slides.push({
+      day: {
+        id: `${baseId}-${dateKey}`,
+        baseId,
+        label: section.heading,
+        sections: [section],
+      },
+      dates: [date],
+    });
+  }
+
+  return slides;
+}
+
 function initScheduleCarousel(root, slideDates) {
   const track = root.querySelector("[data-carousel-track]");
   const dots = root.querySelector("[data-carousel-dots]");
@@ -218,7 +233,7 @@ function initScheduleCarousel(root, slideDates) {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get("day");
     if (requested) {
-      const idx = slideDates.findIndex(({ day }) => day.id === requested);
+      const idx = slideDates.findIndex(({ day }) => day.id === requested || day.baseId === requested);
       if (idx >= 0) return idx;
     }
     const soonest = window.findSoonestBookableSlideIndex(slideDates);
@@ -253,7 +268,7 @@ function initScheduleCarousel(root, slideDates) {
     if (e.key === "ArrowLeft") { e.preventDefault(); goTo(index - 1); }
     if (e.key === "ArrowRight") { e.preventDefault(); goTo(index + 1); }
     if (e.key === "Home") { e.preventDefault(); goTo(0); }
-    if (e.key === "End") { e.preventDefault(); goTo(data.length - 1); }
+    if (e.key === "End") { e.preventDefault(); goTo(slideDates.length - 1); }
   });
 
   // Click row → open modal with date+time+class preselected.
@@ -320,17 +335,14 @@ renderScheduleCarousel();
 document.addEventListener("click", (event) => {
   if (event.target.closest("[data-book-action]")) {
     if (modal) {
-      // Find the first bookable slot of the week, using the same soonest-bookable
+      // Find the first bookable slot in the rolling booking window, using the same soonest-bookable
       // logic as the carousel's auto-open (so the modal lands on the earliest bookable).
       const data = window.weeklySchedule;
       if (data) {
-        const slideDates = data.map((day) => ({
-          day,
-          dates: day.sections.map((section) => window.dateForSection(day.id, section.heading)),
-        }));
+        const slideDates = buildRollingScheduleSlides(data);
         const idx = window.findSoonestBookableSlideIndex(slideDates);
         if (idx >= 0) {
-          const day = data[idx];
+          const day = slideDates[idx].day;
           for (let j = 0; j < day.sections.length; j++) {
             const section = day.sections[j];
             const sectionDate = slideDates[idx].dates[j];
