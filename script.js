@@ -133,7 +133,14 @@ function renderScheduleCarousel() {
   const slideDates = data.map((day) => ({
     day,
     dates: day.sections.map((section) => window.dateForSection(day.id, section.heading)),
-  }));
+  })).sort((a, b) => {
+    const aDate = a.dates.find(Boolean);
+    const bDate = b.dates.find(Boolean);
+    if (!aDate && !bDate) return 0;
+    if (!aDate) return 1;
+    if (!bDate) return -1;
+    return aDate - bDate;
+  });
 
   track.innerHTML = slideDates.map(({ day, dates }, i) => {
     const isWeekend = day.id === "weekend";
@@ -189,14 +196,14 @@ function renderScheduleCarousel() {
   }).join('');
 
   // Dots
-  dots.innerHTML = data.map((day, i) => `
+  dots.innerHTML = slideDates.map(({ day }, i) => `
     <button type="button" class="carousel-dot" data-slide-index="${i}" aria-label="Go to ${day.label}" role="tab"></button>
   `).join('');
 
-  initScheduleCarousel(root, data, slideDates);
+  initScheduleCarousel(root, slideDates);
 }
 
-function initScheduleCarousel(root, data, slideDates) {
+function initScheduleCarousel(root, slideDates) {
   const track = root.querySelector("[data-carousel-track]");
   const dots = root.querySelector("[data-carousel-dots]");
   const prev = root.querySelector("[data-carousel-prev]");
@@ -211,7 +218,7 @@ function initScheduleCarousel(root, data, slideDates) {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get("day");
     if (requested) {
-      const idx = data.findIndex((d) => d.id === requested);
+      const idx = slideDates.findIndex(({ day }) => day.id === requested);
       if (idx >= 0) return idx;
     }
     const soonest = window.findSoonestBookableSlideIndex(slideDates);
@@ -223,7 +230,7 @@ function initScheduleCarousel(root, data, slideDates) {
 
   function goTo(i) {
     if (i < 0) i = 0;
-    if (i >= data.length) i = data.length - 1;
+    if (i >= slideDates.length) i = slideDates.length - 1;
     index = i;
     track.style.transform = `translateX(-${i * 100}%)`;
     dots.querySelectorAll(".carousel-dot").forEach((d, di) => {
@@ -231,7 +238,7 @@ function initScheduleCarousel(root, data, slideDates) {
       else d.removeAttribute("aria-current");
     });
     prev.disabled = i === 0;
-    next.disabled = i === data.length - 1;
+    next.disabled = i === slideDates.length - 1;
   }
 
   prev.addEventListener("click", () => goTo(index - 1));
