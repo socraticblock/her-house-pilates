@@ -6,9 +6,9 @@
     <meta name="geo.region" content="GE-TB">
     <meta name="geo.placename" content="Vera, Tbilisi">
     <title>Class Schedule | Her House Reformer Pilates Tbilisi</title>
-    <meta name="description" content="View the Her House class schedule and book reformer Pilates classes in Vera, Tbilisi. Booking opens 7 days in advance and closes 24 hours before class.">
+    <meta name="description" content="View the Her House weekly class schedule and book reformer Pilates and mat Pilates classes in Vera, Tbilisi. Pick a time that suits you and message us on WhatsApp to reserve your place.">
     <meta property="og:title" content="Class Schedule | Her House Reformer Pilates Tbilisi">
-    <meta property="og:description" content="View the Her House class schedule and book reformer Pilates classes in Vera, Tbilisi. Booking opens 7 days in advance and closes 24 hours before class.">
+    <meta property="og:description" content="View the Her House weekly class schedule and book reformer Pilates and mat Pilates classes in Vera, Tbilisi.">
     <meta property="og:image" content="https://example.com/assets/og/og-image.jpg">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
@@ -37,28 +37,37 @@
       <section class="page-hero">
         <div>
           <p class="eyebrow">Pilates class schedule Tbilisi</p>
-          <h1>Book your reformer Pilates class.</h1>
-          <p>Choose from the next available Her House classes in Vera, Tbilisi. Spaces are limited, booking opens 7 days ahead, and booking closes 24 hours before class.</p>
+          <h1>Pick your weekly class.</h1>
+          <p>Reformer Pilates, mat Pilates, and a hint of yoga coming soon. Choose a time, tap a row to book, and we'll confirm your place on WhatsApp.</p>
         </div>
         <img src="../assets/webp/hero-studio.webp" width="1600" height="900" loading="eager" alt="Her House reformer Pilates studio in Vera, Tbilisi">
       </section>
 
-      <section class="page-content page-schedule" aria-labelledby="schedule-title">
-        <div class="section-title">
-          <span></span><h2 id="schedule-title">Upcoming Classes</h2><span></span>
-        </div>
-        <div class="class-list" id="schedule-list" aria-live="polite"></div>
-      <noscript><div class="noscript-fallback"><p>JavaScript is required to view the live class schedule.</p><p>Please call or message us on <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a> to book your class.</p></div></noscript>
-      </section>
+      <section class="schedule-section" aria-label="Weekly class schedule">
+        <div class="schedule-carousel" data-carousel>
+          <button class="carousel-arrow carousel-prev" type="button" data-carousel-prev aria-label="Previous day">
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"><path d="M15 6 9 12l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
 
-            <section class="page-content schedule-legend" aria-labelledby="legend-title">
-        <h2 id="legend-title">How booking works</h2>
-        <ul class="legend-grid">
-          <li><span class="legend-swatch is-open">Book Class</span><p>Spaces are available and the class is more than 24 hours away. Reserve with your name and WhatsApp.</p></li>
-          <li><span class="legend-swatch is-closed">Class Full</span><p>All spots for this class are taken. Try another time or message us to join the waitlist.</p></li>
-          <li><span class="legend-swatch is-closed">Booking Closed</span><p>Within 24 hours of class start. Bookings are no longer accepted online.</p></li>
-          <li><span class="legend-swatch is-closed">Not Yet Open</span><p>Bookings for this class open 7 days before the start time.</p></li>
-        </ul>
+          <div class="carousel-viewport">
+            <div class="carousel-track" data-carousel-track aria-live="polite">
+              <!-- slides rendered by script.js from schedule-data.js -->
+            </div>
+          </div>
+
+          <button class="carousel-arrow carousel-next" type="button" data-carousel-next aria-label="Next day">
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+
+          <div class="carousel-dots" data-carousel-dots role="tablist" aria-label="Day selector">
+            <!-- dots rendered by script.js -->
+          </div>
+        </div>
+
+        <div class="schedule-cta">
+          <a class="button button-solid book-online" href="/book/" data-book-online>Book Online <span aria-hidden="true">→</span></a>
+          <p class="schedule-note">Pick a row to reserve your place, or message us on <a href="https://wa.me/995555123456">WhatsApp</a>.</p>
+        </div>
       </section>
 
       <section class="final-cta">
@@ -113,6 +122,7 @@
       </section>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="../schedule-data.js"></script>
     <script src="../script.js"></script>
   </body>
 </html>
