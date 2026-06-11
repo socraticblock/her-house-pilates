@@ -1,21 +1,12 @@
-// Her House — booking + nav + weekly schedule carousel
-// Static site, no backend. Bookings persist in sessionStorage only.
-// Studio WhatsApp: +995 555 12 34 56 (placeholder until owner confirms)
+// Her House — booking + nav.
+// Modal lives only on /schedule/. Other pages link to /schedule/ for booking.
+// Schedule data (weekly template) lives in schedule-data.js, loaded before this file.
+// Studio WhatsApp: +995 555 12 34 56 (placeholder until owner confirms).
 
 const STUDIO_WHATSAPP = "995555123456";
 const WHATSAPP_BASE = `https://wa.me/${STUDIO_WHATSAPP}`;
 
-// Hardcoded "next 7 days" preview used by the home page schedule block.
-// (Different from the recurring weekly template in schedule-data.js.)
-const schedule = [
-  { id: "flow-1", title: "Reformer Flow", level: "All Levels", dayOffset: 2, time: "09:00", duration: 60, capacity: 8, booked: 5, instructor: "Nata", status: "open" },
-  { id: "beginner-1", title: "Beginner Reformer", level: "Beginner Friendly", dayOffset: 2, time: "11:00", duration: 60, capacity: 8, booked: 4, instructor: "Elle", status: "open" },
-  { id: "sculpt-1", title: "Sculpt & Strength", level: "Intermediate", dayOffset: 2, time: "18:30", duration: 60, capacity: 8, booked: 6, instructor: "Nata", status: "open" },
-  { id: "reset-1", title: "Stretch & Reset", level: "All Levels", dayOffset: 1, time: "09:00", duration: 50, capacity: 8, booked: 3, instructor: "Elle", status: "open" },
-  { id: "flow-2", title: "Morning Reformer", level: "All Levels", dayOffset: 5, time: "10:00", duration: 50, capacity: 8, booked: 8, instructor: "Nata", status: "open" },
-];
-
-// Persist bookings in sessionStorage so refresh doesn't wipe them.
+// === Booking dedup (sessionStorage, per-tab) ===
 const BOOKINGS_KEY = "herhouse.bookings.v1";
 
 function loadBookings() {
@@ -37,7 +28,7 @@ function saveBookings(map) {
 
 const bookings = loadBookings();
 
-const classList = document.querySelector(".class-list");
+// === DOM refs (only present on /schedule/) ===
 const modal = document.querySelector("#booking-modal");
 const selectedClassText = document.querySelector("#selected-class");
 const classIdInput = document.querySelector("#class-id");
@@ -46,11 +37,7 @@ const toast = document.querySelector("#toast");
 const navToggle = document.querySelector(".nav-toggle");
 const mobileNav = document.querySelector(".mobile-nav");
 
-// ---- Booking context ----
-// The modal can be opened from two places:
-//   - Home page: a class from the next-7-days `schedule` array (date + time + capacity rules)
-//   - Schedule page: a weekly slot (day + time, no specific date, no capacity rules)
-// `pendingBooking` is set when the modal opens and read on submit.
+// === Pending booking context (set when modal opens, read on submit) ===
 let pendingBooking = null;
 
 function setPendingBooking(ctx) {
@@ -58,92 +45,28 @@ function setPendingBooking(ctx) {
   if (classIdInput) classIdInput.value = ctx.id;
 }
 
-function classDate(item) {
-  const date = new Date();
-  date.setDate(date.getDate() + item.dayOffset);
-  const [hours, minutes] = item.time.split(":").map(Number);
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+// === Phone normalization (Georgia +995 / 995 / local 5XXXXXXXX) ===
+function normalizePhone(value) {
+  const digits = String(value || "").replace(/[^\d+]/g, "");
+  if (!digits) return "";
+  if (/^5\d{8}$/.test(digits)) return `+995${digits}`;
+  if (/^\+?9955\d{8}$/.test(digits)) return digits.startsWith("+") ? digits : `+${digits}`;
+  return digits.length >= 9 ? digits : "";
 }
 
-function formatDate(date) {
-  return new Intl.DateTimeFormat("en", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  }).format(date);
+// === Toast ===
+function showToast(message) {
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  setTimeout(() => toast.classList.remove("is-visible"), 5200);
 }
 
-function formatTimeRange(date, duration) {
-  const end = new Date(date.getTime() + duration * 60 * 1000);
-  const options = { hour: "2-digit", minute: "2-digit", hour12: false };
-  return `${date.toLocaleTimeString("en", options)} - ${end.toLocaleTimeString("en", options)}`;
-}
-
-function bookingState(item) {
-  const date = classDate(item);
-  const now = new Date();
-  const hoursUntil = (date - now) / 36e5;
-  const daysUntil = Math.floor((date - now) / 864e5);
-  const spaces = item.capacity - item.booked;
-
-  if (item.status === "cancelled") return { label: "Cancelled", buttonLabel: "Cancelled", disabled: true, reason: "This class has been cancelled." };
-  if (spaces <= 0) return { label: "Class full", buttonLabel: "Class Full", disabled: true, reason: "This class is full." };
-  if (hoursUntil <= 24) return { label: "Booking closed — less than 24h before class", buttonLabel: "Booking Closed", disabled: true, reason: "Booking closes 24 hours before class." };
-  if (daysUntil > 7) return { label: "Bookings open 7 days before class", buttonLabel: "Not Yet Open", disabled: true, reason: "Bookings open 7 days before class." };
-  return { label: `${spaces} spaces left`, buttonLabel: "Book Class", disabled: false, reason: "" };
-}
-
-function renderSchedule() {
-  if (!classList) return;
-
-  classList.innerHTML = schedule.map((item) => {
-    const date = classDate(item);
-    const state = bookingState(item);
-    const closed = state.disabled ? " is-closed" : "";
-    return `
-      <article class="class-card${closed}">
-        <div>
-          <h3>${item.title}</h3>
-          <p class="class-level">${item.level}</p>
-        </div>
-        <div>
-          <p class="class-meta">${formatDate(date)}</p>
-          <p class="class-meta">${formatTimeRange(date, item.duration)}</p>
-          <p class="class-meta">Instructor: ${item.instructor}</p>
-        </div>
-        <p class="spaces">${state.label}</p>
-        <button class="button button-solid" type="button" data-class-id="${item.id}" ${state.disabled ? "disabled" : ""}>
-          ${state.buttonLabel}
-        </button>
-      </article>
-    `;
-  }).join("");
-}
-
-function openModal(item) {
-  if (!modal || !form || !selectedClassText || !classIdInput) {
-    window.location.href = "/schedule/";
-    return;
-  }
-  const date = classDate(item);
-  setPendingBooking({
-    id: item.id,
-    type: "next7",
-    item,
-    date,
-  });
-  selectedClassText.textContent = `${item.title} — ${formatDate(date)}, ${formatTimeRange(date, item.duration)} with ${item.instructor}.`;
-  modal.classList.add("is-open");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-  setTimeout(() => form.elements.name.focus(), 50);
-}
-
-// Open the modal for a weekly slot (schedule page). slot is from schedule-data.js.
-function openModalForSlot(slot, dayId, dayLabel) {
+// === Modal open/close (weekly only — next-7-days flow is gone) ===
+function openModalForSlot(slot, dayId, dayLabel, dayDate) {
   if (!modal || !form || !selectedClassText || !classIdInput) return;
   const id = window.classRowId(dayId, slot);
+  const dateStr = window.formatScheduleDate(dayDate);
   const meta = window.rowMeta(slot);
   setPendingBooking({
     id,
@@ -151,8 +74,9 @@ function openModalForSlot(slot, dayId, dayLabel) {
     slot,
     dayId,
     dayLabel,
+    dayDate: dayDate.toISOString(),
   });
-  selectedClassText.textContent = `${dayLabel} at ${slot.time} — ${slot.title} ${meta}`.trim();
+  selectedClassText.textContent = `${dayLabel}, ${dateStr} at ${slot.time} — ${slot.title} ${meta}`.trim();
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -168,58 +92,32 @@ function closeModal() {
   pendingBooking = null;
 }
 
-function showToast(message) {
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add("is-visible");
-  setTimeout(() => toast.classList.remove("is-visible"), 5200);
-}
-
-// Accepts +995XXXXXXXXX, 995XXXXXXXXX, or local 9XXXXXXXX (8 digits).
-// Returns E.164 string or empty.
-function normalizePhone(value) {
-  const digits = String(value || "").replace(/[^\d+]/g, "");
-  if (!digits) return "";
-  if (/^5\d{8}$/.test(digits)) return `+995${digits}`;
-  if (/^\+?9955\d{8}$/.test(digits)) return digits.startsWith("+") ? digits : `+${digits}`;
-  return digits.length >= 9 ? digits : "";
-}
-
-function openWhatsAppForNext7(item, name, whatsapp) {
-  const date = classDate(item);
-  const text = [
+// === WhatsApp (stopgap until real backend lands) ===
+// v2 format: Class / Date / Time / Instructor / Notes / Name / WhatsApp.
+// Removed: "Sent from her-house-pilates.com", "First time", polite close.
+function openWhatsAppForWeekly(slot, dayLabel, dayDate, name, whatsapp, notes) {
+  const dateStr = window.formatScheduleDate(dayDate);
+  const lines = [
     `Hi Her House, I'd like to book a class.`,
     ``,
-    `*Class:* ${item.title}`,
-    `*Date:* ${formatDate(date)}`,
-    `*Time:* ${formatTimeRange(date, item.duration)}`,
-    `*Instructor:* ${item.instructor}`,
-    `*Name:* ${name}`,
-    `*WhatsApp:* ${whatsapp}`,
-    ``,
-    `Sent from her-house-pilates.com`,
-  ].join("\n");
-  window.open(`${WHATSAPP_BASE}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
-}
-
-function openWhatsAppForWeekly(slot, dayLabel, name, whatsapp) {
-  const meta = window.rowMeta(slot);
-  const text = [
-    `Hi Her House, I'd like to book a class.`,
-    ``,
-    `*Day:* ${dayLabel}`,
-    `*Time:* ${slot.time}`,
     `*Class:* ${slot.title}`,
-    slot.instructor ? `*Instructor:* ${slot.instructor}` : null,
-    `*Name:* ${name}`,
-    `*WhatsApp:* ${whatsapp}`,
-    ``,
-    `Sent from her-house-pilates.com`,
-  ].filter(Boolean).join("\n");
+    `*Date:* ${dateStr}`,
+    `*Time:* ${slot.time}`,
+  ];
+  if (slot.instructor) lines.push(`*Instructor:* ${slot.instructor}`);
+  if (notes) lines.push(`*Notes:* ${notes}`);
+  lines.push(`*Name:* ${name}`);
+  lines.push(`*WhatsApp:* ${whatsapp}`);
+  const text = lines.join("\n");
   window.open(`${WHATSAPP_BASE}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
 }
 
-// ---- Weekly schedule carousel ----
+// === Schedule carousel ===
+//
+// Renders 6 slides from window.weeklySchedule. Each row is date-aware:
+// its booking state is computed against the next upcoming occurrence in
+// Tbilisi local time, so 24h/7d/past/comingSoon rules hold regardless of
+// the visitor's browser timezone.
 
 function renderScheduleCarousel() {
   const root = document.querySelector("[data-carousel]");
@@ -229,60 +127,70 @@ function renderScheduleCarousel() {
   const data = window.weeklySchedule;
   if (!track || !dots || !data) return;
 
-  const today = new Date().getDay(); // 0=Sun..6=Sat
+  // Precompute the next-occurrence date for every slide. Used for date display
+  // and to drive booking state per row.
+  const slideDates = data.map((day) => ({ day, date: window.nextOccurrenceOf(day.id) }));
 
-  // Build slides
-  track.innerHTML = data.map((day, i) => {
+  track.innerHTML = slideDates.map(({ day, date }, i) => {
     const isWeekend = day.id === "weekend";
-    const isToday = (isWeekend && (today === 0 || today === 6)) || (!isWeekend && data.findIndex(d => d.id === ["monday","tuesday","wednesday","thursday","friday"][today === 0 || today === 6 ? 5 : today - 1]) === i);
-    const sections = day.sections.map((section) => `
-      <section class="day-section">
-        <h3 class="section-head">${section.heading} <span class="slide-label">SCHEDULE</span></h3>
-        <ul class="class-rows">
-          ${section.classes.map((slot) => {
-            const meta = window.rowMeta(slot);
-            const disabled = !slot.bookable;
-            const rowId = window.classRowId(day.id, slot);
-            return `
-              <li>
-                <button type="button" class="class-row${disabled ? ' is-disabled' : ''}"
-                        ${disabled ? 'aria-disabled="true" tabindex="-1"' : `data-class-row="${rowId}"`}
-                        aria-label="${disabled ? `${slot.title} coming soon` : `Book ${slot.title} on ${day.label} at ${slot.time}`}">
-                  <span class="class-time">${slot.time}</span>
-                  <span class="class-info">
-                    <span class="class-title">${slot.title}</span>
-                    ${meta ? `<span class="class-meta">${meta}</span>` : ''}
-                  </span>
-                  <span class="class-book" aria-hidden="true"><span class="class-book-text">${disabled ? 'Soon' : 'Book'}</span></span>
-                </button>
-              </li>
-            `;
-          }).join('')}
-        </ul>
-      </section>
-    `).join('');
+    const sections = day.sections.map((section) => {
+      const dateStr = window.formatScheduleDate(date);
+      return `
+        <section class="day-section">
+          <h3 class="section-head">${section.heading} <span class="slide-date">${dateStr}</span> <span class="slide-label">SCHEDULE</span></h3>
+          <ul class="class-rows">
+            ${section.classes.map((slot) => {
+              const state = window.getBookingState(slot, date);
+              const rowId = window.classRowId(day.id, slot);
+              const meta = window.rowMeta(slot);
+              const disabled = state.disabled;
+              const stateLabel = state.disabled ? `<span class="class-state">${state.label}</span>` : "";
+              return `
+                <li>
+                  <button type="button" class="class-row ${state.state}${disabled ? ' is-disabled' : ''}"
+                          ${disabled
+                            ? `aria-disabled="true" tabindex="-1" data-day-id="${day.id}" data-row-id="${rowId}"`
+                            : `data-class-row="${rowId}" data-day-id="${day.id}"`}
+                          aria-label="${disabled
+                            ? `${slot.title} — ${state.label}`
+                            : `Book ${slot.title} on ${day.label} ${window.formatScheduleDate(date)} at ${slot.time}`}">
+                    <span class="class-time">${slot.time}</span>
+                    <span class="class-info">
+                      <span class="class-title">${slot.title}</span>
+                      ${meta ? `<span class="class-meta">${meta}</span>` : ''}
+                      ${stateLabel}
+                    </span>
+                    <span class="class-book" aria-hidden="true">${state.buttonLabel}</span>
+                  </button>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        </section>
+      `;
+    }).join('');
 
+    const dateStr = window.formatScheduleDate(date);
     return `
       <article class="schedule-slide" data-day="${day.id}" role="tabpanel" aria-label="${day.label} schedule">
         <header class="slide-head">
-          <h2 class="slide-day">${day.label}</h2>
+          <h2 class="slide-day">${day.label} <span class="slide-date">${dateStr}</span></h2>
           ${!isWeekend ? '<span class="slide-label">SCHEDULE</span>' : ''}
-          <span class="slide-today"${isToday ? '' : ' hidden'}>Today</span>
         </header>
         ${sections}
       </article>
     `;
   }).join('');
 
-  // Build dots
+  // Dots
   dots.innerHTML = data.map((day, i) => `
     <button type="button" class="carousel-dot" data-slide-index="${i}" aria-label="Go to ${day.label}" role="tab"></button>
   `).join('');
 
-  initScheduleCarousel(root, data);
+  initScheduleCarousel(root, data, slideDates);
 }
 
-function initScheduleCarousel(root, data) {
+function initScheduleCarousel(root, data, slideDates) {
   const track = root.querySelector("[data-carousel-track]");
   const dots = root.querySelector("[data-carousel-dots]");
   const prev = root.querySelector("[data-carousel-prev]");
@@ -290,10 +198,27 @@ function initScheduleCarousel(root, data) {
   const viewport = root.querySelector(".carousel-viewport");
   if (!track || !dots || !prev || !next) return;
 
-  let index = window.todaySlideIndex ? window.todaySlideIndex() : 0;
-  if (index < 0 || index >= data.length) index = 0;
+  // Initial slide: deep link `?day=<id>` overrides; else first slide with a bookable row.
+  function computeInitialIndex() {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("day");
+    if (requested) {
+      const idx = data.findIndex((d) => d.id === requested);
+      if (idx >= 0) return idx;
+    }
+    for (let i = 0; i < slideDates.length; i++) {
+      const slideDate = slideDates[i].date;
+      const hasBookable = data[i].sections.some((section) =>
+        section.classes.some((slot) => window.getBookingState(slot, slideDate).state === "bookable")
+      );
+      if (hasBookable) return i;
+    }
+    return 0;
+  }
 
-  function goTo(i, opts = {}) {
+  let index = computeInitialIndex();
+
+  function goTo(i) {
     if (i < 0) i = 0;
     if (i >= data.length) i = data.length - 1;
     index = i;
@@ -304,13 +229,6 @@ function initScheduleCarousel(root, data) {
     });
     prev.disabled = i === 0;
     next.disabled = i === data.length - 1;
-    if (opts.focus && typeof opts.focus === "string") {
-      const slide = track.children[i];
-      if (slide) {
-        const target = slide.querySelector(opts.focus);
-        if (target) target.focus();
-      }
-    }
   }
 
   prev.addEventListener("click", () => goTo(index - 1));
@@ -321,7 +239,6 @@ function initScheduleCarousel(root, data) {
     goTo(Number(dot.dataset.slideIndex));
   });
 
-  // Keyboard nav when carousel (or its viewport) has focus
   viewport.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); goTo(index - 1); }
     if (e.key === "ArrowRight") { e.preventDefault(); goTo(index + 1); }
@@ -329,27 +246,37 @@ function initScheduleCarousel(root, data) {
     if (e.key === "End") { e.preventDefault(); goTo(data.length - 1); }
   });
 
-  // Click row → open booking modal
+  // Click row → open modal with date+time+class preselected.
+  // Disabled rows (state.disabled) do NOT open the modal; clicking shows a toast.
   track.addEventListener("click", (e) => {
-    const row = e.target.closest("[data-class-row]");
+    const row = e.target.closest("[data-class-row], [data-day-id][data-row-id]");
     if (!row) return;
-    const rowId = row.dataset.classRow;
-    // find the matching slot across all days
-    for (const day of data) {
-      for (const section of day.sections) {
-        const slot = section.classes.find((s) => window.classRowId(day.id, s) === rowId);
-        if (slot) {
-          openModalForSlot(slot, day.id, day.label);
-          return;
-        }
+    const rowId = row.dataset.classRow || row.dataset.rowId;
+    const dayId = row.dataset.dayId;
+    const isBookable = row.hasAttribute("data-class-row");
+    // Find the matching slot
+    let found = null;
+    for (const sd of slideDates) {
+      if (sd.day.id !== dayId) continue;
+      for (const section of sd.day.sections) {
+        const slot = section.classes.find((s) => window.classRowId(dayId, s) === rowId);
+        if (slot) { found = { slot, date: sd.date, day: sd.day }; break; }
       }
+      if (found) break;
     }
+    if (!found) return;
+
+    if (!isBookable) {
+      // Disabled row — show a friendly message instead of opening the modal.
+      const state = window.getBookingState(found.slot, found.date);
+      showToast(state.reason);
+      return;
+    }
+    openModalForSlot(found.slot, found.day.id, found.day.label, found.date);
   });
 
   // Touch swipe
-  let startX = 0;
-  let startY = 0;
-  let tracking = false;
+  let startX = 0, startY = 0, tracking = false;
   viewport.addEventListener("touchstart", (e) => {
     if (!e.touches[0]) return;
     startX = e.touches[0].clientX;
@@ -372,32 +299,36 @@ function initScheduleCarousel(root, data) {
   goTo(index);
 }
 
-// ---- Boot ----
-renderSchedule();
+// === Boot ===
 renderScheduleCarousel();
 
-// Click handler (shared by home page next-7-days + schedule page modal open)
+// === Global click handler ===
+// - `[data-book-action]`: if modal exists, open with first bookable slot of the week;
+//   otherwise navigate to /schedule/. Same UX across all pages.
+// - `[data-close-modal]`: close modal.
+// - `.mobile-nav a`: close mobile menu on link tap.
 document.addEventListener("click", (event) => {
-  const classButton = event.target.closest("[data-class-id]");
-  if (classButton && !classButton.disabled) {
-    const id = classButton.dataset.classId;
-    const found = schedule.find((entry) => entry.id === id);
-    if (found) openModal(found);
-  }
-
-  if (event.target.closest("[data-book-first]")) {
-    // If we're on the schedule page, preselect the first bookable class of today.
-    const todayIdx = window.todaySlideIndex ? window.todaySlideIndex() : -1;
-    if (window.weeklySchedule && todayIdx >= 0) {
-      const today = window.weeklySchedule[todayIdx];
-      for (const section of today.sections) {
-        const slot = section.classes.find((s) => s.bookable);
-        if (slot) { openModalForSlot(slot, today.id, today.label); return; }
+  if (event.target.closest("[data-book-action]")) {
+    if (modal) {
+      // Find first bookable slot across the whole week
+      const data = window.weeklySchedule;
+      if (data) {
+        for (const day of data) {
+          const dayDate = window.nextOccurrenceOf(day.id);
+          for (const section of day.sections) {
+            const slot = section.classes.find((s) => window.getBookingState(s, dayDate).state === "bookable");
+            if (slot) { openModalForSlot(slot, day.id, day.label, dayDate); return; }
+          }
+        }
       }
+      // Fallback: open modal empty (no bookable slot exists at all)
+      if (selectedClassText) selectedClassText.textContent = "No bookable classes this week. Please message us on WhatsApp.";
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    } else {
+      window.location.href = "/schedule/";
     }
-    // Fallback: home page preview
-    const firstOpen = schedule.find((item) => !bookingState(item).disabled);
-    if (firstOpen) openModal(firstOpen);
   }
 
   if (event.target.closest("[data-close-modal]")) {
@@ -421,66 +352,50 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+// === Form submit ===
+// 1. Re-validate booking state at submit time (state may have slipped while the modal was open).
+// 2. Dedup by classId + whatsapp in sessionStorage.
+// 3. Open WhatsApp with v2 message format (Date + Notes added, no boilerplate).
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(form);
   const name = String(data.get("name") || "").trim();
   const whatsapp = normalizePhone(data.get("whatsapp") || "");
+  const notes = String(data.get("notes") || "").trim();
+  const firstTime = data.get("firstTime") === "on";
 
-  if (!pendingBooking) {
+  if (!pendingBooking || pendingBooking.type !== "weekly") {
     showToast("Please choose a class from the schedule.");
     return;
   }
-  if (!name) {
-    showToast("Please add your name.");
-    return;
-  }
-  if (!whatsapp) {
-    showToast("Please add a valid WhatsApp number (e.g. +995 555 12 34 56).");
+  if (!name) { showToast("Please add your name."); return; }
+  if (!whatsapp) { showToast("Please add a valid WhatsApp number (e.g. +995 555 12 34 56)."); return; }
+
+  // Re-validate: state may have changed (clock passed 24h threshold, etc.)
+  const { slot, dayId, dayLabel } = pendingBooking;
+  const dayDate = new Date(pendingBooking.dayDate);
+  const state = window.getBookingState(slot, dayDate);
+  if (state.state !== "bookable") {
+    showToast(state.reason);
+    closeModal();
     return;
   }
 
-  // ---- Weekly template booking ----
-  if (pendingBooking.type === "weekly") {
-    const { slot, dayLabel } = pendingBooking;
-    const key = `weekly:${pendingBooking.id}:${whatsapp}`;
-    if (bookings.has(key)) {
-      showToast("This WhatsApp number is already booked for that slot.");
-      return;
-    }
-    bookings.set(key, { id: pendingBooking.id, name, whatsapp, slot, dayLabel, createdAt: Date.now() });
-    saveBookings(bookings);
-    closeModal();
-    showToast(`You're booked <3 — ${slot.title} on ${dayLabel} at ${slot.time}. Please arrive 10 minutes early.`);
-    openWhatsAppForWeekly(slot, dayLabel, name, whatsapp);
+  // Dedup
+  const key = `weekly:${pendingBooking.id}:${whatsapp}`;
+  if (bookings.has(key)) {
+    showToast("This WhatsApp number is already booked for that slot.");
     return;
   }
 
-  // ---- Next-7-days preview booking ----
-  if (pendingBooking.type === "next7") {
-    const item = pendingBooking.item;
-    const classId = pendingBooking.id;
-    const key = `${classId}:${whatsapp}`;
-    if (bookings.has(key)) {
-      showToast("This WhatsApp number is already booked for that class.");
-      return;
-    }
-    const state = bookingState(item);
-    if (state.disabled) {
-      showToast(state.reason);
-      closeModal();
-      renderSchedule();
-      return;
-    }
-    bookings.set(key, Object.fromEntries(data.entries()));
-    item.booked += 1;
-    saveBookings(bookings);
-    closeModal();
-    renderSchedule();
-    const date = classDate(item);
-    const time = formatTimeRange(date, item.duration);
-    showToast(`You're booked <3 — ${item.title} on ${formatDate(date)}, ${time}. Please arrive 10 minutes early.`);
-    openWhatsAppForNext7(item, name, whatsapp);
-    return;
-  }
+  bookings.set(key, {
+    id: pendingBooking.id,
+    name, whatsapp, notes, firstTime,
+    slot, dayId, dayLabel,
+    createdAt: Date.now(),
+  });
+  saveBookings(bookings);
+  closeModal();
+  showToast(`You're booked <3 — ${slot.title} on ${dayLabel} at ${slot.time}. We'll confirm by WhatsApp.`);
+  openWhatsAppForWeekly(slot, dayLabel, dayDate, name, whatsapp, notes);
 });
