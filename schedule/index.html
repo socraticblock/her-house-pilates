@@ -3,15 +3,25 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="geo.region" content="GE-TB">
+    <meta name="geo.placename" content="Vera, Tbilisi">
     <title>Class Schedule | Her House Reformer Pilates Tbilisi</title>
     <meta name="description" content="View the Her House class schedule and book reformer Pilates classes in Vera, Tbilisi. Booking opens 7 days in advance and closes 24 hours before class.">
+    <meta property="og:title" content="Class Schedule | Her House Reformer Pilates Tbilisi">
+    <meta property="og:description" content="View the Her House class schedule and book reformer Pilates classes in Vera, Tbilisi. Booking opens 7 days in advance and closes 24 hours before class.">
+    <meta property="og:image" content="https://example.com/assets/og/og-image.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles.css">
+    <link rel="canonical" href="https://example.com/schedule/">
   </head>
   <body>
-    <header class="site-header">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
       <a class="brand" href="/" aria-label="Her House home"><span>HER HOUSE</span><small>Pilates Studio</small></a>
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a href="/">Home</a><a href="/schedule/">Schedule</a><a href="/prices/">Prices</a><a href="/new-here/">New Here</a><a href="/about/">About</a><a href="/contact/">Contact</a>
@@ -23,14 +33,14 @@
       <a href="/">Home</a><a href="/schedule/">Schedule</a><a href="/prices/">Prices</a><a href="/new-here/">New Here</a><a href="/about/">About</a><a href="/contact/">Contact</a>
     </nav>
 
-    <main>
+    <main id="main-content">
       <section class="page-hero">
         <div>
           <p class="eyebrow">Pilates class schedule Tbilisi</p>
           <h1>Book your reformer Pilates class.</h1>
           <p>Choose from the next available Her House classes in Vera, Tbilisi. Spaces are limited, booking opens 7 days ahead, and booking closes 24 hours before class.</p>
         </div>
-        <img src="../assets/hero-studio.png" alt="Her House reformer Pilates studio in Vera, Tbilisi">
+        <img src="../assets/webp/hero-studio.webp" width="1600" height="900" loading="eager" alt="Her House reformer Pilates studio in Vera, Tbilisi">
       </section>
 
       <section class="page-content page-schedule" aria-labelledby="schedule-title">
@@ -38,6 +48,17 @@
           <span></span><h2 id="schedule-title">Upcoming Classes</h2><span></span>
         </div>
         <div class="class-list" id="schedule-list" aria-live="polite"></div>
+      <noscript><div class="noscript-fallback"><p>JavaScript is required to view the live class schedule.</p><p>Please call or message us on <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a> to book your class.</p></div></noscript>
+      </section>
+
+            <section class="page-content schedule-legend" aria-labelledby="legend-title">
+        <h2 id="legend-title">How booking works</h2>
+        <ul class="legend-grid">
+          <li><span class="legend-swatch is-open">Book Class</span><p>Spaces are available and the class is more than 24 hours away. Reserve with your name and WhatsApp.</p></li>
+          <li><span class="legend-swatch is-closed">Class Full</span><p>All spots for this class are taken. Try another time or message us to join the waitlist.</p></li>
+          <li><span class="legend-swatch is-closed">Booking Closed</span><p>Within 24 hours of class start. Bookings are no longer accepted online.</p></li>
+          <li><span class="legend-swatch is-closed">Not Yet Open</span><p>Bookings for this class open 7 days before the start time.</p></li>
+        </ul>
       </section>
 
       <section class="final-cta">
@@ -46,7 +67,33 @@
       </section>
     </main>
 
-    <button class="sticky-book" data-book-first>Book Your Class</button>
+    <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-brand-mark">HER HOUSE</span>
+        <p>A luxury women's wellness club and reformer Pilates studio in the heart of Vera, Tbilisi.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <h3>Visit</h3>
+        <a href="/">Home</a>
+        <a href="/schedule/">Schedule</a>
+        <a href="/prices/">Prices</a>
+        <a href="/new-here/">New Here</a>
+        <a href="/about/">About</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+      <div class="footer-contact">
+        <h3>Find us</h3>
+        <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a>
+        <a href="https://instagram.com/herhousepilates">Instagram · @herhousepilates</a>
+        <a href="https://maps.google.com/?q=Vera%2C%20Tbilisi">9 Zakaria Paliashvili St., Vera</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <small>© 2026 Her House Pilates Studio. All rights reserved.</small>
+    </div>
+  </footer>
+  <button class="sticky-book" data-book-first>Book Your Class</button>
     <div class="modal" id="booking-modal" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal></div>
       <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -56,8 +103,8 @@
         <p id="selected-class">Choose a class from the schedule.</p>
         <form id="booking-form">
           <input type="hidden" name="classId" id="class-id">
-          <label>Full name<input name="name" autocomplete="name" required></label>
-          <label>WhatsApp number<input name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="+995 555 12 34 56"></label>
+          <label for="booking-name">Full name<input id="booking-name" name="name" autocomplete="name" required></label>
+          <label for="booking-whatsapp">WhatsApp number<input id="booking-whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="+995 555 12 34 56"></label>
           <label class="checkbox"><input type="checkbox" name="firstTime"> First time at Her House?</label>
           <label>Notes for instructor<textarea name="notes" rows="3" placeholder="Injury, pregnancy, or anything you'd like us to know"></textarea></label>
           <label class="checkbox"><input type="checkbox" required> I understand the booking and cancellation policy.</label>

@@ -1,0 +1,44 @@
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Editors
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+.cache/
+node_modules/
+*.min.css
+*.min.js
+*.min.map
+
+# Lighthouse / audits
+.lighthouseci/
+lighthouse-*.json
+lighthouse-*.html
+
+# Local serve / preview
+.serve/
+.vercel/
+
+# OS temp
+.tmp/
+tmp/

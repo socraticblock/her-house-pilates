@@ -1,3 +1,10 @@
+// Her House — booking + nav
+// Static site, no backend. Bookings persist in sessionStorage only.
+// Studio WhatsApp: +995 555 12 34 56 (placeholder until owner confirms)
+
+const STUDIO_WHATSAPP = "995555123456";
+const WHATSAPP_BASE = `https://wa.me/${STUDIO_WHATSAPP}`;
+
 const schedule = [
   { id: "flow-1", title: "Reformer Flow", level: "All Levels", dayOffset: 2, time: "09:00", duration: 60, capacity: 8, booked: 5, instructor: "Nata", status: "open" },
   { id: "beginner-1", title: "Beginner Reformer", level: "Beginner Friendly", dayOffset: 2, time: "11:00", duration: 60, capacity: 8, booked: 4, instructor: "Elle", status: "open" },
@@ -6,7 +13,29 @@ const schedule = [
   { id: "flow-2", title: "Morning Reformer", level: "All Levels", dayOffset: 5, time: "10:00", duration: 50, capacity: 8, booked: 8, instructor: "Nata", status: "open" },
 ];
 
-const bookings = new Map();
+// Persist bookings in sessionStorage so refresh doesn't wipe them.
+// Key: `${classId}:${whatsapp}`  -> booking payload
+const BOOKINGS_KEY = "herhouse.bookings.v1";
+
+function loadBookings() {
+  try {
+    const raw = sessionStorage.getItem(BOOKINGS_KEY);
+    return raw ? new Map(Object.entries(JSON.parse(raw))) : new Map();
+  } catch {
+    return new Map();
+  }
+}
+
+function saveBookings(map) {
+  try {
+    sessionStorage.setItem(BOOKINGS_KEY, JSON.stringify(Object.fromEntries(map)));
+  } catch {
+    /* sessionStorage disabled */
+  }
+}
+
+const bookings = loadBookings();
+
 const classList = document.querySelector(".class-list");
 const modal = document.querySelector("#booking-modal");
 const selectedClassText = document.querySelector("#selected-class");
@@ -41,13 +70,15 @@ function formatTimeRange(date, duration) {
 function bookingState(item) {
   const date = classDate(item);
   const now = new Date();
+  // Inclusive 24-hour rule: classes within 24 hours are closed.
   const hoursUntil = (date - now) / 36e5;
-  const daysUntil = (date - now) / 864e5;
+  // 7-day window: floor to day boundary so "exactly 7 days away" is allowed.
+  const daysUntil = Math.floor((date - now) / 864e5);
   const spaces = item.capacity - item.booked;
 
   if (item.status === "cancelled") return { label: "Cancelled", buttonLabel: "Cancelled", disabled: true, reason: "This class has been cancelled." };
   if (spaces <= 0) return { label: "Class full", buttonLabel: "Class Full", disabled: true, reason: "This class is full." };
-  if (hoursUntil <= 24) return { label: "Booking closed - less than 24h before class", buttonLabel: "Booking Closed", disabled: true, reason: "Booking closes 24 hours before class." };
+  if (hoursUntil <= 24) return { label: "Booking closed — less than 24h before class", buttonLabel: "Booking Closed", disabled: true, reason: "Booking closes 24 hours before class." };
   if (daysUntil > 7) return { label: "Bookings open 7 days before class", buttonLabel: "Not Yet Open", disabled: true, reason: "Bookings open 7 days before class." };
   return { label: `${spaces} spaces left`, buttonLabel: "Book Class", disabled: false, reason: "" };
 }
@@ -86,7 +117,7 @@ function openModal(item) {
   }
 
   const date = classDate(item);
-  selectedClassText.textContent = `${item.title} - ${formatDate(date)}, ${formatTimeRange(date, item.duration)} with ${item.instructor}.`;
+  selectedClassText.textContent = `${item.title} — ${formatDate(date)}, ${formatTimeRange(date, item.duration)} with ${item.instructor}.`;
   classIdInput.value = item.id;
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
@@ -111,8 +142,33 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove("is-visible"), 5200);
 }
 
+// Accepts +995XXXXXXXXX, 995XXXXXXXXX, or local 9XXXXXXXX (8 digits).
+// Returns E.164 string or empty.
 function normalizePhone(value) {
-  return value.replace(/[^\d+]/g, "");
+  const digits = String(value || "").replace(/[^\d+]/g, "");
+  if (!digits) return "";
+  // Normalize local Georgian format
+  if (/^5\d{8}$/.test(digits)) return `+995${digits}`;
+  if (/^\+?9955\d{8}$/.test(digits)) return digits.startsWith("+") ? digits : `+${digits}`;
+  // Fall back to whatever they typed (with at least 9 digits)
+  return digits.length >= 9 ? digits : "";
+}
+
+function openWhatsAppBooking(item, name, whatsapp) {
+  const date = classDate(item);
+  const text = [
+    `Hi Her House, I'd like to book a class.`,
+    ``,
+    `*Class:* ${item.title}`,
+    `*Date:* ${formatDate(date)}`,
+    `*Time:* ${formatTimeRange(date, item.duration)}`,
+    `*Instructor:* ${item.instructor}`,
+    `*Name:* ${name}`,
+    `*WhatsApp:* ${whatsapp}`,
+    ``,
+    `Sent from her-house-pilates.com`,
+  ].join("\n");
+  window.open(`${WHATSAPP_BASE}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
 }
 
 renderSchedule();
@@ -120,8 +176,9 @@ renderSchedule();
 document.addEventListener("click", (event) => {
   const classButton = event.target.closest("[data-class-id]");
   if (classButton && !classButton.disabled) {
-    const item = schedule.find((entry) => entry.id === classButton.dataset.classId);
-    if (item) openModal(item);
+    const id = classButton.dataset.classId;
+    const found = schedule.find((entry) => entry.id === id);
+    if (found) openModal(found);
   }
 
   if (event.target.closest("[data-book-first]")) {
@@ -145,7 +202,7 @@ navToggle?.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && modal.classList.contains("is-open")) {
+  if (event.key === "Escape" && modal?.classList.contains("is-open")) {
     closeModal();
   }
 });
@@ -155,15 +212,19 @@ form?.addEventListener("submit", (event) => {
   const data = new FormData(form);
   const classId = data.get("classId");
   const item = schedule.find((entry) => entry.id === classId);
+  const name = String(data.get("name") || "").trim();
   const whatsapp = normalizePhone(data.get("whatsapp") || "");
 
   if (!item) {
     showToast("Please choose a class from the schedule.");
     return;
   }
-
-  if (whatsapp.length < 9) {
-    showToast("Please add a WhatsApp number we can use to reach you.");
+  if (!name) {
+    showToast("Please add your name.");
+    return;
+  }
+  if (!whatsapp) {
+    showToast("Please add a valid WhatsApp number (e.g. +995 555 12 34 56).");
     return;
   }
 
@@ -183,8 +244,13 @@ form?.addEventListener("submit", (event) => {
 
   bookings.set(key, Object.fromEntries(data.entries()));
   item.booked += 1;
+  saveBookings(bookings);
   closeModal();
   renderSchedule();
   const date = classDate(item);
-  showToast(`You're booked. We'll see you for ${item.title} on ${formatDate(date)} at ${item.time}. Please arrive 10 minutes early.`);
+  const time = formatTimeRange(date, item.duration);
+  showToast(`You're booked <3 — ${item.title} on ${formatDate(date)}, ${time}. Please arrive 10 minutes early.`);
+
+  // Open WhatsApp to the studio with the booking pre-filled (stopgap until real backend).
+  openWhatsAppBooking(item, name, whatsapp);
 });

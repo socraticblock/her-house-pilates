@@ -3,37 +3,135 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="geo.region" content="GE-TB">
+    <meta name="geo.placename" content="Vera, Tbilisi">
     <title>Her House | Reformer Pilates & Women's Wellness Club in Vera, Tbilisi</title>
     <meta name="description" content="Her House is a luxury women's wellness club and reformer Pilates studio in Vera, Tbilisi. Book small-group Pilates classes in a beautiful, supportive space.">
     <meta property="og:title" content="Her House Pilates Studio">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
     <meta property="og:description" content="More than a workout. It's your place.">
-    <meta property="og:image" content="assets/hero-studio.png">
+    <meta property="og:image" content="assets/og/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script type="application/ld+json">
+    <link rel="canonical" href="https://example.com/">
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://example.com/#business",
+  "name": "Her House Pilates Studio",
+  "description": "A luxury women's wellness club and reformer Pilates studio in Vera, Tbilisi.",
+  "url": "https://example.com",
+  "telephone": "+995-555-123-456",
+  "priceRange": "$$",
+  "image": "https://example.com/assets/og/og-image.jpg",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "9 Zakaria Paliashvili St.",
+    "addressLocality": "Tbilisi",
+    "addressRegion": "Vera",
+    "postalCode": "0179",
+    "addressCountry": "GE"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 41.7151,
+    "longitude": 44.7751
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "07:00",
+      "closes": "21:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Saturday"
+      ],
+      "opens": "09:00",
+      "closes": "18:00"
+    }
+  ],
+  "sameAs": [
+    "https://instagram.com/herhousepilates"
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Pilates Classes",
+    "itemListElement": [
       {
-        "@context": "https://schema.org",
-        "@type": "HealthClub",
-        "name": "Her House Pilates Studio",
-        "description": "Luxury women's wellness club and reformer Pilates studio in Vera, Tbilisi.",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "9 Zakaria Paliashvili St.",
-          "addressLocality": "Tbilisi",
-          "addressRegion": "Vera",
-          "addressCountry": "GE"
-        },
-        "telephone": "+995555123456",
-        "url": "https://example.com",
-        "sameAs": ["https://instagram.com/herhousepilates"],
-        "priceRange": "$$"
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Reformer Pilates Classes"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Beginner Reformer Classes"
+        }
       }
-    </script>
+    ]
+  }
+}</script>
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is reformer Pilates beginner-friendly?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Beginners are welcome and guided through the class from the first minute."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I arrive for class?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Please arrive 10 minutes early so we can help you get settled."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What should I bring to class?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Comfortable movement clothes, water, and grip socks if required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does booking work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Choose a class, leave your name and WhatsApp, and your place is reserved."
+      }
+    }
+  ]
+}</script>
   </head>
   <body>
-    <header class="site-header">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
       <a class="brand" href="/" aria-label="Her House home">
         <span>HER HOUSE</span>
         <small>Pilates Studio</small>
@@ -61,7 +159,7 @@
       <a href="/contact/">Contact</a>
     </nav>
 
-    <main id="home">
+    <main id="main-content">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">Luxury women's wellness club in Vera</p>
@@ -82,7 +180,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="assets/hero-studio.png" alt="Women sitting together in a warm reformer Pilates studio">
+          <img src="assets/webp/hero-studio.webp" width="1600" height="900" loading="eager" fetchpriority="high" alt="Women sitting together in a warm reformer Pilates studio">
         </div>
       </section>
 
@@ -102,25 +200,25 @@
         </div>
         <div class="experience-grid">
           <article class="experience-card">
-            <img src="assets/reformer-class.png" alt="A woman stretching on a reformer Pilates machine">
+            <img src="assets/webp/reformer-class.webp" width="1536" height="1024" loading="lazy" alt="A woman stretching on a reformer Pilates machine">
             <div class="card-icon" aria-hidden="true">PI</div>
             <h3>Reformer Pilates</h3>
             <p>Low-impact, high-results classes designed to strengthen with intention.</p>
           </article>
           <article class="experience-card">
-            <img src="assets/studio-detail.png" alt="Warm studio details with flowers and wellness objects">
+            <img src="assets/webp/studio-detail.webp" width="1536" height="1024" loading="lazy" alt="Warm studio details with flowers and wellness objects">
             <div class="card-icon" aria-hidden="true">FL</div>
             <h3>Wellness & Movement</h3>
             <p>Classes and rituals that support your body, energy, and mind.</p>
           </article>
           <article class="experience-card">
-            <img src="assets/hero-studio.png" alt="Women talking in a reformer Pilates studio">
+            <img src="assets/webp/hero-studio.webp" width="1600" height="900" loading="lazy" alt="Women talking in a reformer Pilates studio">
             <div class="card-icon" aria-hidden="true">CM</div>
             <h3>Women's Community</h3>
             <p>Real connections, good conversations, and a community that lifts you up.</p>
           </article>
           <article class="experience-card">
-            <img src="assets/rooftop-social.png" alt="Women enjoying a rooftop wellness moment at sunset">
+            <img src="assets/webp/rooftop-social.webp" width="1536" height="1024" loading="lazy" alt="Women enjoying a rooftop wellness moment at sunset">
             <div class="card-icon" aria-hidden="true">SU</div>
             <h3>Rooftop & Social Moments</h3>
             <p>Sunsets, coffee, post-class chats, and moments that become memories.</p>
@@ -136,10 +234,11 @@
           <a href="/schedule/">View full schedule <span aria-hidden="true">-></span></a>
         </div>
         <div class="class-list" id="schedule-list" aria-live="polite"></div>
+      <noscript><div class="noscript-fallback"><p>JavaScript is required to view the live class schedule.</p><p>Please call or message us on <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a> to book your class.</p></div></noscript>
       </section>
 
       <section class="new-here" id="new-here" aria-labelledby="new-here-title">
-        <img src="assets/studio-detail.png" alt="Her House studio detail with flowers and candle">
+        <img src="assets/webp/studio-detail.webp" width="1536" height="1024" loading="lazy" alt="Her House studio detail with flowers and candle">
         <div class="new-here-copy">
           <p class="eyebrow">New here?</p>
           <h2 id="new-here-title">First time?</h2>
@@ -213,7 +312,7 @@
         <div class="map-card" aria-label="Map preview of Her House in Vera">
           <div class="map-pin">H</div>
           <div class="studio-card">
-            <img src="assets/hero-studio.png" alt="Her House studio interior">
+            <img src="assets/webp/hero-studio.webp" width="1600" height="900" loading="lazy" alt="Her House studio interior">
             <h3>Her House Pilates Studio</h3>
             <p>Your movement home in the heart of Vera.</p>
             <a href="https://maps.google.com/?q=Vera%2C%20Tbilisi">Get directions <span aria-hidden="true">-></span></a>
@@ -230,7 +329,33 @@
       </section>
     </main>
 
-    <button class="sticky-book" data-book-first>Book Your Class</button>
+    <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-brand-mark">HER HOUSE</span>
+        <p>A luxury women's wellness club and reformer Pilates studio in the heart of Vera, Tbilisi.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <h3>Visit</h3>
+        <a href="/">Home</a>
+        <a href="/schedule/">Schedule</a>
+        <a href="/prices/">Prices</a>
+        <a href="/new-here/">New Here</a>
+        <a href="/about/">About</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+      <div class="footer-contact">
+        <h3>Find us</h3>
+        <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a>
+        <a href="https://instagram.com/herhousepilates">Instagram · @herhousepilates</a>
+        <a href="https://maps.google.com/?q=Vera%2C%20Tbilisi">9 Zakaria Paliashvili St., Vera</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <small>© 2026 Her House Pilates Studio. All rights reserved.</small>
+    </div>
+  </footer>
+  <button class="sticky-book" data-book-first>Book Your Class</button>
 
     <div class="modal" id="booking-modal" aria-hidden="true">
       <div class="modal-backdrop" data-close-modal></div>
@@ -241,8 +366,8 @@
         <p id="selected-class">Choose a class from the schedule.</p>
         <form id="booking-form">
           <input type="hidden" name="classId" id="class-id">
-          <label>Full name<input name="name" autocomplete="name" required></label>
-          <label>WhatsApp number<input name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="+995 555 12 34 56"></label>
+          <label for="booking-name">Full name<input id="booking-name" name="name" autocomplete="name" required></label>
+          <label for="booking-whatsapp">WhatsApp number<input id="booking-whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="+995 555 12 34 56"></label>
           <label class="checkbox"><input type="checkbox" name="firstTime"> First time at Her House?</label>
           <label>Notes for instructor<textarea name="notes" rows="3" placeholder="Injury, pregnancy, or anything you'd like us to know"></textarea></label>
           <label class="checkbox"><input type="checkbox" required> I understand the booking and cancellation policy.</label>
