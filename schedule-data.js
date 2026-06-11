@@ -197,6 +197,53 @@ function formatScheduleDate(date) {
   return fmt.format(date);
 }
 
+// Get the UTC Date when a class starts (Tbilisi wall-clock time of the slot).
+function getClassStartTime(slot, dayDate) {
+  const parts = getTbilisiParts(dayDate);
+  const [hh, mm] = slot.time.split(":").map(Number);
+  return tbilisiToUTC(parts.year, parts.month, parts.day, hh, mm, 0);
+}
+
+// For a slide's section, return the next occurrence date.
+// The weekend slide has TWO sub-sections (Saturday + Sunday), each with its own
+// day-of-week. The helper resolves "Saturday"/"Sunday" headings to their specific
+// dates, and falls back to the slide's dayId for weekday slides.
+function dateForSection(dayId, sectionHeading) {
+  const dow = String(sectionHeading || "").toLowerCase();
+  if (dow === "saturday" || dow === "sunday") {
+    return nextOccurrenceOf(dow);
+  }
+  return nextOccurrenceOf(dayId);
+}
+
+// Find the slide index that contains the SOONEST bookable class across all slides.
+// Returns -1 if no slide has any bookable class.
+// slides: array of { day: weeklySchedule[i], dates: [Date, ...] } — one date per
+// sub-section, so the weekend slide is checked across both Saturday and Sunday.
+function findSoonestBookableSlideIndex(slides) {
+  let bestIdx = -1;
+  let bestStart = null;
+  for (let i = 0; i < slides.length; i++) {
+    const slide = slides[i];
+    for (let j = 0; j < slide.day.sections.length; j++) {
+      const section = slide.day.sections[j];
+      const sectionDate = slide.dates && slide.dates[j];
+      if (!sectionDate) continue;
+      for (const slot of section.classes) {
+        const state = getBookingState(slot, sectionDate);
+        if (state.state === "bookable") {
+          const start = getClassStartTime(slot, sectionDate);
+          if (bestStart === null || start < bestStart) {
+            bestStart = start;
+            bestIdx = i;
+          }
+        }
+      }
+    }
+  }
+  return bestIdx;
+}
+
 // === Booking state machine ===
 // Per spec: 4 states — bookable, soon, past, comingSoon.
 // - comingSoon: data.bookable === false (overrides everything)
@@ -292,5 +339,8 @@ if (typeof window !== "undefined") {
   window.getBookingState = getBookingState;
   window.formatScheduleDate = formatScheduleDate;
   window.nowInTbilisi = nowInTbilisi;
+  window.getClassStartTime = getClassStartTime;
+  window.dateForSection = dateForSection;
+  window.findSoonestBookableSlideIndex = findSoonestBookableSlideIndex;
   window.TBILISI_TZ = TBILISI_TZ;
 }

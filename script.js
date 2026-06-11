@@ -127,20 +127,27 @@ function renderScheduleCarousel() {
   const data = window.weeklySchedule;
   if (!track || !dots || !data) return;
 
-  // Precompute the next-occurrence date for every slide. Used for date display
-  // and to drive booking state per row.
-  const slideDates = data.map((day) => ({ day, date: window.nextOccurrenceOf(day.id) }));
+  // Precompute per-section dates. The weekend slide has TWO sub-sections
+  // (Saturday + Sunday) each with its own day-of-week, so each gets its own date.
+  // Weekday slides have a single date.
+  const slideDates = data.map((day) => ({
+    day,
+    dates: day.sections.map((section) => window.dateForSection(day.id, section.heading)),
+  }));
 
-  track.innerHTML = slideDates.map(({ day, date }, i) => {
+  track.innerHTML = slideDates.map(({ day, dates }, i) => {
     const isWeekend = day.id === "weekend";
-    const sections = day.sections.map((section) => {
-      const dateStr = window.formatScheduleDate(date);
+    // Slide-level date (used for the slide header) = first section's date.
+    const headerDate = dates[0];
+    const headerDateStr = window.formatScheduleDate(headerDate);
+    const sections = day.sections.map((section, j) => {
+      const dateStr = window.formatScheduleDate(dates[j]);
       return `
         <section class="day-section">
           <h3 class="section-head">${section.heading} <span class="slide-date">${dateStr}</span> <span class="slide-label">SCHEDULE</span></h3>
           <ul class="class-rows">
             ${section.classes.map((slot) => {
-              const state = window.getBookingState(slot, date);
+              const state = window.getBookingState(slot, dates[j]);
               const rowId = window.classRowId(day.id, slot);
               const meta = window.rowMeta(slot);
               const disabled = state.disabled;
@@ -153,7 +160,7 @@ function renderScheduleCarousel() {
                             : `data-class-row="${rowId}" data-day-id="${day.id}"`}
                           aria-label="${disabled
                             ? `${slot.title} — ${state.label}`
-                            : `Book ${slot.title} on ${day.label} ${window.formatScheduleDate(date)} at ${slot.time}`}">
+                            : `Book ${slot.title} on ${day.label} ${window.formatScheduleDate(dates[j])} at ${slot.time}`}">
                     <span class="class-time">${slot.time}</span>
                     <span class="class-info">
                       <span class="class-title">${slot.title}</span>
@@ -170,11 +177,10 @@ function renderScheduleCarousel() {
       `;
     }).join('');
 
-    const dateStr = window.formatScheduleDate(date);
     return `
       <article class="schedule-slide" data-day="${day.id}" role="tabpanel" aria-label="${day.label} schedule">
         <header class="slide-head">
-          <h2 class="slide-day">${day.label} <span class="slide-date">${dateStr}</span></h2>
+          <h2 class="slide-day">${day.label} <span class="slide-date">${headerDateStr}</span></h2>
           ${!isWeekend ? '<span class="slide-label">SCHEDULE</span>' : ''}
         </header>
         ${sections}
@@ -198,7 +204,9 @@ function initScheduleCarousel(root, data, slideDates) {
   const viewport = root.querySelector(".carousel-viewport");
   if (!track || !dots || !prev || !next) return;
 
-  // Initial slide: deep link `?day=<id>` overrides; else first slide with a bookable row.
+  // Initial slide: deep link `?day=<id>` overrides; else the slide with the SOONEST
+  // bookable class. Skips past/soon/comingSoon rows; falls back to slide 0 only if
+  // literally every class across every slide is unbookable (extreme edge case).
   function computeInitialIndex() {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get("day");
@@ -206,13 +214,8 @@ function initScheduleCarousel(root, data, slideDates) {
       const idx = data.findIndex((d) => d.id === requested);
       if (idx >= 0) return idx;
     }
-    for (let i = 0; i < slideDates.length; i++) {
-      const slideDate = slideDates[i].date;
-      const hasBookable = data[i].sections.some((section) =>
-        section.classes.some((slot) => window.getBookingState(slot, slideDate).state === "bookable")
-      );
-      if (hasBookable) return i;
-    }
+    const soonest = window.findSoonestBookableSlideIndex(slideDates);
+    if (soonest >= 0) return soonest;
     return 0;
   }
 
@@ -254,15 +257,15 @@ function initScheduleCarousel(root, data, slideDates) {
     const rowId = row.dataset.classRow || row.dataset.rowId;
     const dayId = row.dataset.dayId;
     const isBookable = row.hasAttribute("data-class-row");
-    // Find the matching slot
+    // Find the matching slot (weekend sub-sections use their own date, not the slide's primary date)
     let found = null;
-    for (const sd of slideDates) {
+    outer: for (const sd of slideDates) {
       if (sd.day.id !== dayId) continue;
-      for (const section of sd.day.sections) {
+      for (let j = 0; j < sd.day.sections.length; j++) {
+        const section = sd.day.sections[j];
         const slot = section.classes.find((s) => window.classRowId(dayId, s) === rowId);
-        if (slot) { found = { slot, date: sd.date, day: sd.day }; break; }
+        if (slot) { found = { slot, date: sd.dates[j], day: sd.day }; break outer; }
       }
-      if (found) break;
     }
     if (!found) return;
 
@@ -310,22 +313,30 @@ renderScheduleCarousel();
 document.addEventListener("click", (event) => {
   if (event.target.closest("[data-book-action]")) {
     if (modal) {
-      // Find first bookable slot across the whole week
+      // Find the first bookable slot of the week, using the same soonest-bookable
+      // logic as the carousel's auto-open (so the modal lands on the earliest bookable).
       const data = window.weeklySchedule;
       if (data) {
-        for (const day of data) {
-          const dayDate = window.nextOccurrenceOf(day.id);
-          for (const section of day.sections) {
-            const slot = section.classes.find((s) => window.getBookingState(s, dayDate).state === "bookable");
-            if (slot) { openModalForSlot(slot, day.id, day.label, dayDate); return; }
+        const slideDates = data.map((day) => ({
+          day,
+          dates: day.sections.map((section) => window.dateForSection(day.id, section.heading)),
+        }));
+        const idx = window.findSoonestBookableSlideIndex(slideDates);
+        if (idx >= 0) {
+          const day = data[idx];
+          for (let j = 0; j < day.sections.length; j++) {
+            const section = day.sections[j];
+            const sectionDate = slideDates[idx].dates[j];
+            const slot = section.classes.find((s) => window.getBookingState(s, sectionDate).state === "bookable");
+            if (slot) { openModalForSlot(slot, day.id, day.label, sectionDate); return; }
           }
         }
+        // Fallback: open modal empty (no bookable slot exists at all)
+        if (selectedClassText) selectedClassText.textContent = "No bookable classes this week. Please message us on WhatsApp.";
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
       }
-      // Fallback: open modal empty (no bookable slot exists at all)
-      if (selectedClassText) selectedClassText.textContent = "No bookable classes this week. Please message us on WhatsApp.";
-      modal.classList.add("is-open");
-      modal.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
     } else {
       window.location.href = "/schedule/";
     }
