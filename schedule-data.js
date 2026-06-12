@@ -289,7 +289,7 @@ function getBookingState(slot, dayDate) {
   if (hoursUntil < 24) {
     return {
       state: "soon",
-      label: "Booking closed - less than 24h before class",
+      label: "24h window closed",
       buttonLabel: "Closed",
       reason: SOON_REASON_24H,
       disabled: true,
@@ -299,7 +299,7 @@ function getBookingState(slot, dayDate) {
   if (hoursUntil > 168) {
     return {
       state: "soon",
-      label: "Bookings open 7 days before class",
+      label: "Opens 7 days before",
       buttonLabel: "Not yet open",
       reason: SOON_REASON_7D,
       disabled: true,

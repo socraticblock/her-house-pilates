@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../styles.css?v=20260612-schedule-mobile">
+    <link rel="stylesheet" href="../styles.css?v=20260612-elite">
     <link rel="canonical" href="https://example.com/schedule/">
   </head>
   <body>
@@ -38,7 +38,7 @@
         <div>
           <p class="eyebrow">Pilates class schedule Tbilisi</p>
           <h1>Pick your weekly class.</h1>
-          <p>Reformer Pilates, mat Pilates, and a hint of yoga coming soon. Choose a time, tap a row to book, and we'll confirm your place on WhatsApp.</p>
+          <p>Choose the next class that fits your week. Tap an available row, leave your details, and the studio will confirm your place on WhatsApp.</p>
         </div>
         <img src="../assets/webp/hero-studio.webp" width="1600" height="900" loading="eager" alt="Her House reformer Pilates studio in Vera, Tbilisi">
       </section>
@@ -65,14 +65,14 @@
         </div>
 
         <div class="schedule-cta">
-          <a class="button button-solid book-online" href="/book/" data-book-online>Book Online <span aria-hidden="true">→</span></a>
-          <p class="schedule-note">Pick a row to reserve your place, or message us on <a href="https://wa.me/995555123456">WhatsApp</a>.</p>
+          <a class="button button-solid book-online" href="/book/" data-book-online>Book Online <span aria-hidden="true">&rarr;</span></a>
+          <p class="schedule-note">Available rows open the booking form. Closed rows stay visible so you can see the full studio rhythm.</p>
         </div>
       </section>
 
       <section class="final-cta">
         <div><h2>Your place is waiting.</h2><p>Reserve a reformer and come move with us.</p></div>
-        <button class="button button-outline light" data-book-action>Book Your Class <span aria-hidden="true">-></span></button>
+        <button class="button button-outline light" data-book-action>Book Your Class <span aria-hidden="true">&rarr;</span></button>
       </section>
     </main>
 
@@ -93,9 +93,9 @@
       </nav>
       <div class="footer-contact">
         <h3>Find us</h3>
-        <a href="https://wa.me/995555123456">WhatsApp · +995 555 12 34 56</a>
+        <a href="https://wa.me/995555123456">WhatsApp</a>
         <a href="https://instagram.com/herhousepilates">Instagram · @herhousepilates</a>
-        <a href="https://maps.google.com/?q=Vera%2C%20Tbilisi">9 Zakaria Paliashvili St., Vera</a>
+        <a href="https://maps.google.com/?q=Vera%2C%20Tbilisi">Vera, Tbilisi</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -112,16 +112,16 @@
         <form id="booking-form">
           <input type="hidden" name="classId" id="class-id">
           <label for="booking-name">Full name<input id="booking-name" name="name" autocomplete="name" required></label>
-          <label for="booking-whatsapp">WhatsApp number<input id="booking-whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="+995 555 12 34 56"></label>
+          <label for="booking-whatsapp">WhatsApp number<input id="booking-whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" required placeholder="Your WhatsApp number"></label>
           <label class="checkbox"><input type="checkbox" name="firstTime"> First time at Her House?</label>
           <label>Notes for instructor<textarea name="notes" rows="3" placeholder="Injury, pregnancy, or anything you'd like us to know"></textarea></label>
-          <label class="checkbox"><input type="checkbox" required> I understand the booking and cancellation policy.</label>
+          <label class="checkbox"><input type="checkbox" required> I understand the 24-hour booking and cancellation policy.</label>
           <button class="button button-solid" type="submit">Confirm Booking</button>
         </form>
       </section>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="../schedule-data.js"></script>
-    <script src="../script.js?v=20260612-schedule-mobile"></script>
+    <script src="../schedule-data.js?v=20260612-elite"></script>
+    <script src="../script.js?v=20260612-elite"></script>
   </body>
 </html>
