@@ -248,12 +248,22 @@ function initScheduleCarousel(root, slideDates) {
     if (i >= slideDates.length) i = slideDates.length - 1;
     index = i;
     track.style.transform = `translateX(-${i * 100}%)`;
+    syncCarouselHeight();
     dots.querySelectorAll(".carousel-dot").forEach((d, di) => {
       if (di === i) d.setAttribute("aria-current", "true");
       else d.removeAttribute("aria-current");
     });
     prev.disabled = i === 0;
     next.disabled = i === slideDates.length - 1;
+  }
+
+  function syncCarouselHeight() {
+    const activeSlide = track.children[index];
+    if (!activeSlide) return;
+    const children = Array.from(activeSlide.children);
+    const gap = parseFloat(window.getComputedStyle(activeSlide).rowGap) || 0;
+    const contentHeight = children.reduce((total, child) => total + child.offsetHeight, 0) + Math.max(children.length - 1, 0) * gap;
+    viewport.style.height = `${contentHeight}px`;
   }
 
   prev.addEventListener("click", () => goTo(index - 1));
@@ -322,6 +332,7 @@ function initScheduleCarousel(root, slideDates) {
   });
 
   goTo(index);
+  window.addEventListener("resize", syncCarouselHeight);
 }
 
 // === Boot ===

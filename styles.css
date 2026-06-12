@@ -1586,12 +1586,29 @@ button.class-row {
 
 /* ---- Mobile ---- */
 @media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   .schedule-section {
+    width: 100%;
+    max-width: 100%;
     padding: 0 16px;
   }
   .schedule-carousel {
+    width: 100%;
+    max-width: 100%;
     padding: 28px 16px 28px;
     border-radius: 22px;
+  }
+  .carousel-viewport,
+  .carousel-track,
+  .schedule-slide {
+    max-width: 100%;
+  }
+  .carousel-viewport {
+    width: 100%;
   }
   .carousel-arrow {
     display: none;
@@ -1646,7 +1663,7 @@ button.class-row {
   .class-time {
     font-size: 13px;
   }
-}oot {
+:root {
   --burgundy: #6a3038;
   --wine: #4a2227;
   --rose: #b77a82;
@@ -3294,12 +3311,29 @@ button.class-row {
 
 /* ---- Mobile ---- */
 @media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   .schedule-section {
+    width: 100%;
+    max-width: 100%;
     padding: 0 16px;
   }
   .schedule-carousel {
+    width: 100%;
+    max-width: 100%;
     padding: 28px 16px 28px;
     border-radius: 22px;
+  }
+  .carousel-viewport,
+  .carousel-track,
+  .schedule-slide {
+    max-width: 100%;
+  }
+  .carousel-viewport {
+    width: 100%;
   }
   .carousel-arrow {
     display: none;
@@ -3452,5 +3486,35 @@ button.class-row {
   }
   .schedule-cta-card .button {
     width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .schedule-section,
+  .schedule-carousel,
+  .carousel-viewport,
+  .carousel-track,
+  .schedule-slide {
+    max-width: 100%;
+  }
+
+  .schedule-section {
+    width: 100%;
+  }
+
+  .schedule-carousel {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .carousel-viewport {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 }
