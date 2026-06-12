@@ -366,22 +366,6 @@ h3 {
   object-fit: cover;
 }
 
-.card-icon {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 999px;
-  background: rgba(255, 249, 245, 0.9);
-  color: var(--rose);
-  font-family: var(--serif);
-  font-weight: 700;
-  border: 1px solid rgba(106, 48, 56, 0.1);
-}
-
 .experience-card h3,
 .experience-card p {
   padding-inline: 22px;
@@ -526,13 +510,8 @@ h3 {
   min-width: 0;
 }
 
-.promise-grid span {
-  color: var(--rose);
-  font-size: 34px;
-}
-
 .promise-grid h3 {
-  margin: 8px 0 6px;
+  margin: 0 0 6px;
   font-family: var(--sans);
   font-size: 13px;
   font-weight: 900;
@@ -1154,12 +1133,6 @@ textarea:focus {
     aspect-ratio: auto;
   }
 
-  .experience-card .card-icon {
-    width: 42px;
-    height: 42px;
-    font-size: 15px;
-  }
-
   .experience-card h3,
   .experience-card p {
     grid-column: 2;
@@ -1208,14 +1181,7 @@ textarea:focus {
   }
 
   .promise-grid article {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    column-gap: 12px;
-    align-items: center;
-  }
-
-  .promise-grid p {
-    grid-column: 2;
+    display: block;
   }
 
   .map-card {
