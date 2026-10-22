@@ -87,3 +87,7 @@ Colors, typography, spacing, button styles — all defined as CSS custom propert
 - `width`/`height` set on every `<img>` to prevent layout shift
 - No third-party JS, no tracking scripts (until owner adds them)
 - Self-hosted fonts via Google Fonts with `preconnect`
+
+---
+
+More from me: **[socraticblock.com](https://www.socraticblock.com/)** — portfolio, case studies and engineering notes.
